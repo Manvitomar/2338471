@@ -134,7 +134,7 @@ if st.button("Load Notifications"):
 
         
 
-        st.subheader("🏆 Top 10 Priority Notifications")
+        st.subheader("Top 10 Priority Notifications")
 
         for rank, notification in enumerate(
             top10,
