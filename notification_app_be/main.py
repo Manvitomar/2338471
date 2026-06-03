@@ -1,0 +1,17 @@
+import requests
+from datetime import datetime
+
+TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJNYXBDbGFpbXMiOnsiYXVkIjoiaHR0cDovLzIwLjI0NC41Ni4xNDQvZXZhbHVhdGlvbi1zZXJ2aWNlIiwiZW1haWwiOiJtYW52aXRvbWFyMDQ2QGdtYWlsLmNvbSIsImV4cCI6MTc4MDQ3NjczMiwiaWF0IjoxNzgwNDc1ODMyLCJpc3MiOiJBZmZvcmQgTWVkaWNhbCBUZWNobm9sb2dpZXMgUHJpdmF0ZSBMaW1pdGVkIiwianRpIjoiZmNlZjZhNzYtYjQ4My00YjliLWEzNGItMzU4OTE1NDU5NGNjIiwibG9jYWxlIjoiZW4tSU4iLCJuYW1lIjoibWFudmkiLCJzdWIiOiIwMDQwNmMyOS1hNGQ3LTQzNGMtOGQxMC0yNzlkZDIzYjA4NGIifSwiZW1haWwiOiJtYW52aXRvbWFyMDQ2QGdtYWlsLmNvbSIsIm5hbWUiOiJtYW52aSIsInJvbGxObyI6IjIzMzg0NzEiLCJhY2Nlc3NDb2RlIjoibnd3c0t4IiwiY2xpZW50SUQiOiIwMDQwNmMyOS1hNGQ3LTQzNGMtOGQxMC0yNzlkZDIzYjA4NGIiLCJjbGllbnRTZWNyZXQiOiJGSmF2bmpXRVpWY3hEcWRiIn0.lPgYmX-3a2gXjYDBGzlWvxHdzZTVcRJX_SMHCt1AHss"
+
+URL = "http://4.224.186.213/evaluation-service/notifications"
+
+headers = {
+    "Authorization": f"Bearer {TOKEN}"
+}
+
+response = requests.get(
+    URL,
+    headers=headers
+)
+
+print(response.json())
