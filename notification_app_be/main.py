@@ -1,20 +1,28 @@
+import streamlit as st
 import requests
 from datetime import datetime
 
-TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJNYXBDbGFpbXMiOnsiYXVkIjoiaHR0cDovLzIwLjI0NC41Ni4xNDQvZXZhbH" \
-"VhdGlvbi1zZXJ2aWNlIiwiZW1haWwiOiJtYW52aXRvbWFyMDQ2QGdtYWlsLmNvbSIsImV4cCI6MTc4MDQ3OTAxNiwiaWF0IjoxNzgwNDc4M" \
-"TE2LCJpc3MiOiJBZmZvcmQgTWVkaWNhbCBUZWNobm9sb2dpZXMgUHJpdmF0ZSBMaW1pdGVkIiwianRpIjoiNTZiOWQ0YjAtMGJjMi00Njk2LWI" \
-"xNWQtYzJjZWY3Y2E0ZTgwIiwibG9jYWxlIjoiZW4tSU4iLCJuYW1lIjoibWFudmkiLCJzdWIiOiIwMDQwNmMyOS1hNGQ3LTQzNGMtOGQxMC0yNzlkZDIzY" \
-"jA4NGIifSwiZW1haWwiOiJtYW52aXRvbWFyMDQ2QGdtYWlsLmNvbSIsIm5hbWUiOiJtYW52aSIsInJvbGxObyI6IjIzMzg0NzEiLCJhY2Nlc3NDb2RlIjoibnd" \
-"3c0t4IiwiY2xpZW50SUQiOiIwMDQwNmMyOS1hNGQ3LTQzNGMtOGQxMC0yNzlkZDIzYjA4NGIiLCJjbGllbnRTZWNyZXQiOiJGSmF2bmpXRVpWY3hEcWRiIn0.l9LD0s" \
-"76TvBUPKbyZaW96TfK3w95O-2mYicKS7_ELJM"
+
+
+TOKEN =  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJNYXBDbGFpbXMiOnsiYXVkIjoiaHR0cDovLzIwLjI0NC41Ni4xNDQvZXZhbHVh" \
+"dGlvbi1zZXJ2aWNlIiwiZW1haWwiOiJtYW52aXRvbWFyMDQ2QGdtYWlsLmNvbSIsImV4cCI6MTc4MDQ4MDEzNSwiaWF0IjoxNzgwNDc5MjM1LCJpc3Mi" \
+"OiJBZmZvcmQgTWVkaWNhbCBUZWNobm9sb2dpZXMgUHJpdmF0ZSBMaW1pdGVkIiwianRpIjoiYmU2Y2EyMDAtMTQ4Zi00NjExLWJhZDUtODkxYTM4MWQxZWVjI" \
+"iwibG9jYWxlIjoiZW4tSU4iLCJuYW1lIjoibWFudmkiLCJzdWIiOiIwMDQwNmMyOS1hNGQ3LTQzNGMtOGQxMC0yNzlkZDIzYjA4NGIifSwiZW1haWwiOiJtYW52aXRvbW" \
+"FyMDQ2QGdtYWlsLmNvbSIsIm5hbWUiOiJtYW52aSIsInJvbGxObyI6IjIzMzg0NzEiLCJhY2Nlc3NDb2RlIjoibnd3c0t4IiwiY2xpZW50SUQiOiIwMDQwNmMyOS1hNGQ3LTQzNG" \
+"MtOGQxMC0y" \
+"NzlkZDIzYjA4NGIiLCJjbGllbnRTZWNyZXQiOiJGSmF2bmpXRVpWY3hEcWRiIn0.XRxgrohaFJM26sgpOPMHkbOkP44dQ2FQBQsUvFEk9xE"
+
 
 URL = "http://4.224.186.213/evaluation-service/notifications"
+
 WEIGHTS = {
     "Placement": 3,
     "Result": 2,
     "Event": 1
 }
+
+
+
 def calculate_score(notification):
 
     weight = WEIGHTS.get(
@@ -31,32 +39,74 @@ def calculate_score(notification):
         datetime.now() - timestamp
     ).total_seconds() / 3600
 
-    score = (weight * 100) - age_hours
+    return (weight * 100) - age_hours
 
-    return score
-headers = {
-    "Authorization": f"Bearer {TOKEN}"
-}
 
-response = requests.get(
-    URL,
-    headers=headers
+
+
+st.set_page_config(
+    page_title="Notification Prioritization System",
+    layout="wide"
 )
-data = response.json()
 
-notifications = data["notifications"]
-notifications.sort(
-    key=calculate_score,
-    reverse=True
-)
-top10 = notifications[:10]
-print("\nTOP 10 PRIORITY NOTIFICATIONS\n")
+st.title("Notification Prioritization System")
 
-for i, n in enumerate(top10, start=1):
+if st.button("Load Notifications"):
 
-    print(
-        f"{i}. "
-        f"{n['Type']} | "
-        f"{n['Message']} | "
-        f"{n['Timestamp']}"
+    headers = {
+        "Authorization": f"Bearer {TOKEN}"
+    }
+
+    response = requests.get(
+        URL,
+        headers=headers
     )
+
+    if response.status_code != 200:
+        st.error(
+            f"Error: {response.text}"
+        )
+
+    else:
+
+        data = response.json()
+
+        notifications = data["notifications"]
+
+        notifications.sort(
+            key=calculate_score,
+            reverse=True
+        )
+
+        top10 = notifications[:10]
+
+        st.success(
+            f"Top {len(top10)} Notifications Loaded"
+        )
+
+        for i, n in enumerate(top10, start=1):
+
+            st.card = st.container()
+
+            with st.card:
+
+                st.subheader(
+                    f"{i}. {n['Type']}"
+                )
+
+                st.write(
+                    n["Message"]
+                )
+
+                st.caption(
+                    n["Timestamp"]
+                )
+
+                score = round(
+                    calculate_score(n),
+                    2
+                )
+
+                st.write(
+                    f"Priority Score: {score}"
+                )
