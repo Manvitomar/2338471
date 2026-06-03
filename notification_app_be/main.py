@@ -2,16 +2,12 @@ import streamlit as st
 import requests
 from datetime import datetime
 
-
-
-TOKEN =  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJNYXBDbGFpbXMiOnsiYXVkIjoiaHR0cDovLzIwLjI0NC41Ni4xNDQvZXZhbHVh" \
-"dGlvbi1zZXJ2aWNlIiwiZW1haWwiOiJtYW52aXRvbWFyMDQ2QGdtYWlsLmNvbSIsImV4cCI6MTc4MDQ4MDEzNSwiaWF0IjoxNzgwNDc5MjM1LCJpc3Mi" \
-"OiJBZmZvcmQgTWVkaWNhbCBUZWNobm9sb2dpZXMgUHJpdmF0ZSBMaW1pdGVkIiwianRpIjoiYmU2Y2EyMDAtMTQ4Zi00NjExLWJhZDUtODkxYTM4MWQxZWVjI" \
-"iwibG9jYWxlIjoiZW4tSU4iLCJuYW1lIjoibWFudmkiLCJzdWIiOiIwMDQwNmMyOS1hNGQ3LTQzNGMtOGQxMC0yNzlkZDIzYjA4NGIifSwiZW1haWwiOiJtYW52aXRvbW" \
-"FyMDQ2QGdtYWlsLmNvbSIsIm5hbWUiOiJtYW52aSIsInJvbGxObyI6IjIzMzg0NzEiLCJhY2Nlc3NDb2RlIjoibnd3c0t4IiwiY2xpZW50SUQiOiIwMDQwNmMyOS1hNGQ3LTQzNG" \
-"MtOGQxMC0y" \
-"NzlkZDIzYjA4NGIiLCJjbGllbnRTZWNyZXQiOiJGSmF2bmpXRVpWY3hEcWRiIn0.XRxgrohaFJM26sgpOPMHkbOkP44dQ2FQBQsUvFEk9xE"
-
+TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJNYXBDbGFpbXMiOnsiYXVkIjoiaHR0cDovLzIwLjI0NC41Ni4xNDQvZXZhbHVhdGlvbi1zZX" \
+"J2aWNlIiwiZW1haWwiOiJtYW52aXRvbWFyMDQ2QGdtYWlsLmNvbSIsImV4cCI6MTc4MDQ4MDc1MSwiaWF0IjoxNzgwNDc5ODUxLCJpc3MiOiJBZmZvcmQgTWVkaW" \
+"NhbCBUZWNobm9sb2dpZXMgUHJpdmF0ZSBMaW1pdGVkIiwianRpIjoiMjI0MWY1YmYtYTMxOS00YmJlLWJkZmMtMTZjNDExOTVjOGQzIiwibG9jYWxlIjoiZW4tSU4iLCJuYW" \
+"1lIjoibWFudmkiLCJzdWIiOiIwMDQwNmMyOS1hNGQ3LTQzNGMtOGQxMC0yNzlkZDIzYjA4NGIifSwiZW1haWwiOiJtYW52aXRvbWFyMDQ2QGdtYWlsLmNvbSIsIm5hbWUiOiJtYW52aSI" \
+"sInJvbGxObyI6IjIzMzg0NzEiLCJhY2Nlc3NDb2RlIjoibnd3c0t4IiwiY2xpZW50SUQiOiIwMDQwNmMyOS1hNGQ3LTQzNGMtOG" \
+"QxMC0yNzlkZDIzYjA4NGIiLCJjbGllbnRTZWNyZXQiOiJGSmF2bmpXRVpWY3hEcWRiIn0.Lsi8F4B6q702sn97Avo3kRxIRqibNYc9auXVfmvwU2U"
 
 URL = "http://4.224.186.213/evaluation-service/notifications"
 
@@ -22,6 +18,15 @@ WEIGHTS = {
 }
 
 
+
+st.set_page_config(
+    page_title="Notification Dashboard",
+    page_icon="📢",
+    layout="wide"
+)
+
+st.title("Smart Notification Prioritization System")
+st.caption("AffordMed Campus Hiring Evaluation")
 
 def calculate_score(notification):
 
@@ -39,19 +44,14 @@ def calculate_score(notification):
         datetime.now() - timestamp
     ).total_seconds() / 3600
 
-    return (weight * 100) - age_hours
+    return round(
+        (weight * 100) - age_hours,
+        2
+    )
 
 
 
-
-st.set_page_config(
-    page_title="Notification Prioritization System",
-    layout="wide"
-)
-
-st.title("Notification Prioritization System")
-
-if st.button("Load Notifications"):
+def fetch_notifications():
 
     headers = {
         "Authorization": f"Bearer {TOKEN}"
@@ -62,16 +62,68 @@ if st.button("Load Notifications"):
         headers=headers
     )
 
+    return response
+
+
+
+if st.button("Load Notifications"):
+
+    response = fetch_notifications()
+
     if response.status_code != 200:
-        st.error(
-            f"Error: {response.text}"
-        )
+
+        st.error("Failed to fetch notifications")
+        st.write(response.text)
 
     else:
 
         data = response.json()
 
         notifications = data["notifications"]
+
+        
+
+        placement_count = len([
+            n for n in notifications
+            if n["Type"] == "Placement"
+        ])
+
+        result_count = len([
+            n for n in notifications
+            if n["Type"] == "Result"
+        ])
+
+        event_count = len([
+            n for n in notifications
+            if n["Type"] == "Event"
+        ])
+
+       
+
+        col1, col2, col3, col4 = st.columns(4)
+
+        col1.metric(
+            "Total",
+            len(notifications)
+        )
+
+        col2.metric(
+            "Placement",
+            placement_count
+        )
+
+        col3.metric(
+            "Result",
+            result_count
+        )
+
+        col4.metric(
+            "Event",
+            event_count
+        )
+
+        st.divider()
+
 
         notifications.sort(
             key=calculate_score,
@@ -80,33 +132,31 @@ if st.button("Load Notifications"):
 
         top10 = notifications[:10]
 
-        st.success(
-            f"Top {len(top10)} Notifications Loaded"
-        )
+        
 
-        for i, n in enumerate(top10, start=1):
+        st.subheader("🏆 Top 10 Priority Notifications")
 
-            st.card = st.container()
+        for rank, notification in enumerate(
+            top10,
+            start=1
+        ):
 
-            with st.card:
+            score = calculate_score(
+                notification
+            )
 
-                st.subheader(
-                    f"{i}. {n['Type']}"
+            with st.container():
+
+                st.markdown(
+                    f"""
+### #{rank} | {notification['Type']}
+
+**Message:** {notification['Message']}
+
+**Timestamp:** {notification['Timestamp']}
+
+**Priority Score:** {score}
+"""
                 )
 
-                st.write(
-                    n["Message"]
-                )
-
-                st.caption(
-                    n["Timestamp"]
-                )
-
-                score = round(
-                    calculate_score(n),
-                    2
-                )
-
-                st.write(
-                    f"Priority Score: {score}"
-                )
+                st.divider()
